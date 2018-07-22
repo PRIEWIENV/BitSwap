@@ -3,7 +3,7 @@ import hashlib
 import bitcoin.rpc
 
 from bitcoin.wallet import CBitcoinSecret, P2PKHBitcoinAddress
-from bitcoin.core import b2x, lx, COIN, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
+from bitcoin.core import b2x, COIN, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160, lx
 from bitcoin.core.script import CScript, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL, OP_RETURN, OP_ELSE, OP_ENDIF, OP_IF, OP_CHECKLOCKTIMEVERIFY, OP_DROP, OP_DUP
 from bitcoin.core.scripteval import VerifyScript, SCRIPT_VERIFY_P2SH
 
@@ -63,7 +63,8 @@ def demo():
 
     # convert little-endian hex to bytes
     # tx from last block (202)
-    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    #txid = b2lx(proxy.getblock(proxy.getblockhash(proxy.getblockcount())).hashPrevBlock)
+    txid = lx('6b3ff20a952d3406606646f56f26b93d96245d63244d647ef7f8ca8932d1bd0f')
     vout = 0
 
     # Create the txin structure, which includes the outpoint. The scriptSig
@@ -96,6 +97,7 @@ def demo():
 
     # Done! Print the transaction to standard output with the bytes-to-hex
     # function.
+    print('STEP3')
     print('='*10+'TRANSACTION OUTPUT'+'='*10)
     print(b2x(tx.serialize()))
 
@@ -103,7 +105,8 @@ def demo():
     # b sends CLTV
 
     # if it reaches nLockTime the cancel, if not then A can take d away
-    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    #txid = b2lx(proxy.getblock(proxy.getblockhash(proxy.getblockcount())).hashPrevBlock)
+    txid = lx('36e54fb7b87eb5a0cf56845909699677da9706c081c66331291adc1b3c72d28d')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript([OP_IF, proxy.getblockcount(), OP_CHECKLOCKTIMEVERIFY, OP_DROP, g_sk_b, OP_CHECKSIG] +[OP_ELSE, OP_HASH160, Hash160(sk_a.pub), OP_EQUALVERIFY, g_sk_a, OP_CHECKSIG, OP_ENDIF])
@@ -118,7 +121,8 @@ def demo():
 
     # step 5
     # a gets y BCH by sk_a
-    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    #txid = b2lx(proxy.getblock(proxy.getblockhash(proxy.getblockcount())).hashPrevBlock)
+    txid = lx('63d4c26dcc89fab7a7591efa872f9f3d8a97dc6c97328c1ec1982f2d42841bf8')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(sk_a.pub), OP_EQUALVERIFY, OP_CHECKSIG])
@@ -134,7 +138,8 @@ def demo():
 
     # step 6
     #b gets the the ownership of sk_a, sk_b
-    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    #txid = b2lx(proxy.getblock(proxy.getblockhash(proxy.getblockcount())).hashPrevBlock)
+    txid = lx('24713221119c95c2e7906aef2c16330f4b5bd84df430a9ab3aaef89094b1bdbc')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript(
@@ -154,7 +159,8 @@ def demo():
     # tx from last block (202)
     #txid = proxy.getblockhash(proxy.getblockcount())
     #txid = lx(txid.decode())
-    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    #txid = b2lx(proxy.getblock(proxy.getblockhash(proxy.getblockcount())).hashPrevBlock)
+    txid = lx('6433f9ff3cc54c6f4b034c8560243b4ac4926ee071389296bd32db31103ddeee')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript(
