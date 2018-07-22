@@ -47,8 +47,8 @@ def demo():
     addr_a = P2PKHBitcoinAddress.from_pubkey(sk_a.pub)
     addr_b = P2PKHBitcoinAddress.from_pubkey(sk_b.pub)
 
-    print(type(sk_a.pub))
-    print(type(sk_a))
+    #print(type(sk_a.pub))
+    #print(type(sk_a))
 
     print('A\'s Address: {}'.format(addr_a))
     print('B\'s Address: {}'.format(addr_b))
@@ -80,8 +80,8 @@ def demo():
     # Here we'll create that scriptPubKey from scratch using the pubkey that
     # corresponds to the secret key we generated above.
     hash_c = hashlib.sha256(str(g_sk_b).encode()).digest()
-    payload = bytearray([d, hash_d, sig_d, txid, g_sk_a, hash_c])
-    #payload = d
+    #payload = bytearray([d, hash_d, sig_d, txid, g_sk_a, hash_c])
+    payload = b''.join([d, hash_d, sig_d, txid, g_sk_a, hash_c])
     txin_scriptPubKey = CScript(
         [OP_RETURN, addr_c, str(y).encode(), payload, True])
 
@@ -150,8 +150,7 @@ def demo():
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     hash_b = hashlib.sha256(str(g_sk_b).encode()).digest()
-    payload = [d, hash_d, sig_d, txid, g_sk_c, hash_b]
-    #payload = d
+    payload = b''.join([d, hash_d, sig_d, txid, g_sk_c, hash_b])
     txin_scriptPubKey = CScript(
         [OP_RETURN, addr_c, str(y).encode(), payload, True])
     txin_scriptPubKey = CScript(
