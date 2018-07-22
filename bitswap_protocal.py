@@ -16,7 +16,7 @@ def demo():
         End:  A: y BCH | B: d
     """
 
-    d = "This is a test string"
+    d = hashlib.sha256(b'This is a test string').digest()
     y = 0.001
 
     proxy = bitcoin.rpc.Proxy(
@@ -35,6 +35,8 @@ def demo():
     h_b = hashlib.sha256(b'b').digest()
     sk_b = CBitcoinSecret.from_secret_bytes(h_b)
     g_sk_b = sk_b.pub
+
+    d = sk_a.sign(d)
 
     print('A\'s Pub: {}'.format(g_sk_a))
     print('B\'s Pub: {}'.format(g_sk_b))
@@ -77,7 +79,7 @@ def demo():
     # Here we'll create that scriptPubKey from scratch using the pubkey that
     # corresponds to the secret key we generated above.
     txin_scriptPubKey = CScript(
-        [OP_RETURN, addr_c, str(y).encode(), d.encode(), True])
+        [OP_RETURN, addr_c, str(y).encode(), d, True])
 
     # Create the txout. This time we create the scriptPubKey from shared peer c's address
     txout = CMutableTxOut(y * COIN, addr_c.to_scriptPubKey())
@@ -109,12 +111,13 @@ def demo():
     txid = lx('36e54fb7b87eb5a0cf56845909699677da9706c081c66331291adc1b3c72d28d')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
-    txin_scriptPubKey = CScript([OP_IF, proxy.getblockcount(), OP_CHECKLOCKTIMEVERIFY, OP_DROP, g_sk_b, OP_CHECKSIG] +[OP_ELSE, OP_HASH160, Hash160(sk_a.pub), OP_EQUALVERIFY, g_sk_a, OP_CHECKSIG, OP_ENDIF])
+    txin_scriptPubKey = CScript([OP_IF, proxy.getblockcount()+10, OP_CHECKLOCKTIMEVERIFY, OP_DROP, g_sk_b, OP_CHECKSIG] +[OP_ELSE, OP_HASH160, Hash160(sk_a), OP_EQUALVERIFY, g_sk_a, OP_CHECKSIG, OP_ENDIF])
     txout = CMutableTxOut(y * COIN, addr_c.to_scriptPubKey())
     tx = CMutableTransaction([txin], [txout])
     sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
     sig = sk_a.sign(sighash) + bytes([SIGHASH_ALL])
     txin.scriptSig = CScript([sig, sk_a.pub])
+    #VerifyScript(txin.scriptSig, txin_scriptPubKey, tx, 0, (SCRIPT_VERIFY_P2SH,))
     print('='*10+'TRANSACTION OUTPUT'+'='*10)
     print(b2x(tx.serialize()))
 
@@ -143,7 +146,7 @@ def demo():
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript(
-        [OP_RETURN, addr_b, str(y).encode(), d.encode(), True])
+        [OP_RETURN, addr_b, str(y).encode(), d, True])
     txout = CMutableTxOut(y * COIN, addr_b.to_scriptPubKey())
     tx = CMutableTransaction([txin], [txout])
     sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
@@ -164,7 +167,7 @@ def demo():
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
     txin_scriptPubKey = CScript(
-        [OP_RETURN, addr_b, str(y).encode(), d.encode(), True])
+        [OP_RETURN, addr_b, str(y).encode(), d, True])
     txout = CMutableTxOut(y * COIN, addr_b.to_scriptPubKey())
     tx = CMutableTransaction([txin], [txout])
     sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
