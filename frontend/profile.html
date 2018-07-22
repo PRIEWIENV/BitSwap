@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Bitcoin Cash</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  
+  <link rel="stylesheet" href="css/profile.css">
+
+</head>
+
+<body>
+  <header class="header">
+    <div class="container header__container">
+        <div class="header__logo"><img class="header__img" src="pic/LOGO.png" width="60" height="68"> <h1 class="header__title"><span class="header__light">with</span> Dorahacks</h1></div> 
+        <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+    
+    <div class="header__menu">
+      <nav id="navbar" class="header__nav collapse">
+        <ul class="header__elenco">
+          <li class="header__el"><a href="index.html" class="header__link">Home</a></li>
+          <li class="header__el"><a href="transfer.html" class="header__link">Transfer</a></li>
+          <li class="header__el"><a href="profile.html" class="header__link">Profile</a></li>
+          <li class="header__el header__el--blue"><a href="signin.html" class="btn btn--white">Sign In →</a></li>
+        </ul>
+      </nav>
+    </div>
+      </div>
+  </header>
+
+<div class="dashboard-heading">
+    <div ng-app="app" ng-controller="coin">
+  <div class="all">
+    <div class="starter-stats">
+      <div class="blok">
+        <i class="fa fa-money"></i>
+        <div class="no">
+        <p>Asset Types</p>
+        <p>3</p>
+          </div>
+      </div>
+      
+      <div class="blok">
+        <i class="fa fa-money kl"></i>
+        <div class="no">
+        <p>Total Gains</p>
+        <p>-100.01 BCH</p>
+          </div>
+      </div>
+      
+      <div class="blok">
+        <i class="fa fa-money pl"></i>
+        <div class="no">
+        <p>Longest HODL</p>
+        <p>8 Months</p>
+          </div>
+      </div>
+      <div class="clear"></div>
+        <div class="gains">
+          <canvas id="myChart"></canvas>
+        </div>
+      
+    </div>
+    
+  </div>
+  
+</div>
+</body>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.6/angular.js'></script>
+
+  
+
+    <script  src="js/profile.js"></script>
+
+</html>
