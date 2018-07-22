@@ -16,7 +16,8 @@ def demo():
         End:  A: y BCH | B: d
     """
 
-    d = hashlib.sha256(b'This is a test string').digest()
+    d = b'This is a test string'
+    hash_d = hashlib.sha256(d).digest()
     y = 0.001
 
     proxy = bitcoin.rpc.Proxy(
@@ -36,7 +37,7 @@ def demo():
     sk_b = CBitcoinSecret.from_secret_bytes(h_b)
     g_sk_b = sk_b.pub
 
-    d = sk_a.sign(d)
+    sig_d = sk_a.sign(hash_d)
 
     print('A\'s Pub: {}'.format(g_sk_a))
     print('B\'s Pub: {}'.format(g_sk_b))
@@ -78,8 +79,11 @@ def demo():
     #
     # Here we'll create that scriptPubKey from scratch using the pubkey that
     # corresponds to the secret key we generated above.
+    hash_c = hashlib.sha256(str(g_sk_b).encode()).digest()
+    payload = bytearray([d, hash_d, sig_d, txid, g_sk_a, hash_c])
+    #payload = d
     txin_scriptPubKey = CScript(
-        [OP_RETURN, addr_c, str(y).encode(), d, True])
+        [OP_RETURN, addr_c, str(y).encode(), payload, True])
 
     # Create the txout. This time we create the scriptPubKey from shared peer c's address
     txout = CMutableTxOut(y * COIN, addr_c.to_scriptPubKey())
@@ -145,8 +149,13 @@ def demo():
     txid = lx('24713221119c95c2e7906aef2c16330f4b5bd84df430a9ab3aaef89094b1bdbc')
     vout = 0
     txin = CMutableTxIn(COutPoint(txid, vout))
+    hash_b = hashlib.sha256(str(g_sk_b).encode()).digest()
+    payload = [d, hash_d, sig_d, txid, g_sk_c, hash_b]
+    #payload = d
     txin_scriptPubKey = CScript(
-        [OP_RETURN, addr_b, str(y).encode(), d, True])
+        [OP_RETURN, addr_c, str(y).encode(), payload, True])
+    txin_scriptPubKey = CScript(
+        [OP_RETURN, addr_b, str(y).encode(), payload, True])
     txout = CMutableTxOut(y * COIN, addr_b.to_scriptPubKey())
     tx = CMutableTransaction([txin], [txout])
     sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
