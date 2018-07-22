@@ -4,9 +4,8 @@ import bitcoin.rpc
 
 from bitcoin.wallet import CBitcoinSecret, P2PKHBitcoinAddress
 from bitcoin.core import b2x, lx, COIN, COutPoint, CMutableTxOut, CMutableTxIn, CMutableTransaction, Hash160
-from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL, OP_RETURN
+from bitcoin.core.script import CScript, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, SignatureHash, SIGHASH_ALL, OP_RETURN, OP_ELSE, OP_ENDIF, OP_IF, OP_CHECKLOCKTIMEVERIFY, OP_DROP, OP_DUP
 from bitcoin.core.scripteval import VerifyScript, SCRIPT_VERIFY_P2SH
-from bitcoin.core.key import CPubKey
 
 bitcoin.SelectParams('regtest')  # regression test net
 
@@ -76,9 +75,6 @@ def demo():
     #
     # Here we'll create that scriptPubKey from scratch using the pubkey that
     # corresponds to the secret key we generated above.
-
-    #txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(sk_b.pub), OP_EQUALVERIFY, OP_CHECKSIG])
-    # print(txin_scriptPubKey)
     txin_scriptPubKey = CScript(
         [OP_RETURN, addr_c, str(y).encode(), d.encode(), True])
 
@@ -98,70 +94,77 @@ def demo():
     # Set the scriptSig of our transaction input appropriately.
     txin.scriptSig = CScript([sig, sk_a.pub])
 
-    # Verify the signature worked. This calls EvalScript() and actually executes
-    # the opcodes in the scripts to see if everything worked out. If it doesn't an
-    # exception will be raised.
-    #VerifyScript(txin.scriptSig, txin_scriptPubKey, tx, 0, (SCRIPT_VERIFY_P2SH,))
-
     # Done! Print the transaction to standard output with the bytes-to-hex
     # function.
+    print('='*10+'TRANSACTION OUTPUT'+'='*10)
     print(b2x(tx.serialize()))
 
     #step 4
-    # b send CLTV
+    # b sends CLTV
 
-    #CScript([OP_IF]+self.check_time +[OP_ELSE, self.expiry_nlocktime,OP_ENDIF])
     # if it reaches nLockTime the cancel, if not then A can take d away
+    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    vout = 0
+    txin = CMutableTxIn(COutPoint(txid, vout))
+    txin_scriptPubKey = CScript([OP_IF, proxy.getblockcount(), OP_CHECKLOCKTIMEVERIFY, OP_DROP, g_sk_b, OP_CHECKSIG] +[OP_ELSE, OP_HASH160, Hash160(sk_a.pub), OP_EQUALVERIFY, g_sk_a, OP_CHECKSIG, OP_ENDIF])
+    txout = CMutableTxOut(y * COIN, addr_c.to_scriptPubKey())
+    tx = CMutableTransaction([txin], [txout])
+    sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
+    sig = sk_a.sign(sighash) + bytes([SIGHASH_ALL])
+    txin.scriptSig = CScript([sig, sk_a.pub])
+    print('='*10+'TRANSACTION OUTPUT'+'='*10)
+    print(b2x(tx.serialize()))
+
 
     # step 5
+    # a gets y BCH by sk_a
+    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    vout = 0
+    txin = CMutableTxIn(COutPoint(txid, vout))
+    txin_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(sk_a.pub), OP_EQUALVERIFY, OP_CHECKSIG])
+    txout = CMutableTxOut(y * COIN, addr_a.to_scriptPubKey())
+    tx = CMutableTransaction([txin], [txout])
+    sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
+    sig = sk_c.sign(sighash) + bytes([SIGHASH_ALL])
+    txin.scriptSig = CScript([sig, sk_c.pub])
+    VerifyScript(txin.scriptSig, txin_scriptPubKey, tx, 0, (SCRIPT_VERIFY_P2SH,))
+    print('='*10+'TRANSACTION OUTPUT'+'='*10)
+    print(b2x(tx.serialize()))
+
 
     # step 6
+    #b gets the the ownership of sk_a, sk_b
+    txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
+    vout = 0
+    txin = CMutableTxIn(COutPoint(txid, vout))
+    txin_scriptPubKey = CScript(
+        [OP_RETURN, addr_b, str(y).encode(), d.encode(), True])
+    txout = CMutableTxOut(y * COIN, addr_b.to_scriptPubKey())
+    tx = CMutableTransaction([txin], [txout])
+    sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
+    sig = sk_c.sign(sighash) + bytes([SIGHASH_ALL])
+    txin.scriptSig = CScript([sig, sk_c.pub])
+    print('='*10+'TRANSACTION OUTPUT'+'='*10)
+    print(b2x(tx.serialize()))
+
+
 
     # step 7
-
     # convert little-endian hex to bytes
     # tx from last block (202)
     #txid = proxy.getblockhash(proxy.getblockcount())
     #txid = lx(txid.decode())
     txid = lx('39550b284f858318ffb358dcf73587fb2b7184abbd4d0b6056e87c7aee2c3811')
     vout = 0
-
-    # Create the txin structure, which includes the outpoint. The scriptSig
-    # defaults to being empty.
     txin = CMutableTxIn(COutPoint(txid, vout))
-
-    # We also need the scriptPubKey of the output we're spending because
-    # SignatureHash() replaces the transaction scriptSig's with it.
-    #
-    # Here we'll create that scriptPubKey from scratch using the pubkey that
-    # corresponds to the secret key we generated above.
-
     txin_scriptPubKey = CScript(
         [OP_RETURN, addr_b, str(y).encode(), d.encode(), True])
-
-    # Create the txout. This time we create the scriptPubKey from peer b's address
     txout = CMutableTxOut(y * COIN, addr_b.to_scriptPubKey())
-
-    # Create the unsigned transaction.
     tx = CMutableTransaction([txin], [txout])
-
-    # Calculate the signature hash for that transaction.
     sighash = SignatureHash(txin_scriptPubKey, tx, 0, SIGHASH_ALL)
-
-    # Now sign it. We have to append the type of signature we want to the end, in
-    # this case the usual SIGHASH_ALL.
     sig = sk_c.sign(sighash) + bytes([SIGHASH_ALL])
-
-    # Set the scriptSig of our transaction input appropriately.
     txin.scriptSig = CScript([sig, sk_c.pub])
-
-    # Verify the signature worked. This calls EvalScript() and actually executes
-    # the opcodes in the scripts to see if everything worked out. If it doesn't an
-    # exception will be raised.
-    #VerifyScript(txin.scriptSig, txin_scriptPubKey, tx, 0, (SCRIPT_VERIFY_P2SH,))
-
-    # Done! Print the transaction to standard output with the bytes-to-hex
-    # function.
+    print('='*10+'TRANSACTION OUTPUT'+'='*10)
     print(b2x(tx.serialize()))
 
 
